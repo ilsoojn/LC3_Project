@@ -23,9 +23,9 @@ struct LC3RegisterInfo : public LC3GenRegisterInfo {
   LC3RegisterInfo();
 
   /// Code Generation virtual methods...
-  const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
-  const uint32_t *getCallPreservedMask(const MachineFunction &MF,
-                                       CallingConv::ID CC) const override;
+  // const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+  // const uint32_t *getCallPreservedMask(const MachineFunction &MF,
+  //                                      CallingConv::ID CC) const override;
 
   const TargetRegisterClass *getPointerRegClass(const MachineFunction &MF,
                                                 unsigned Kind) const override;
@@ -40,6 +40,8 @@ struct LC3RegisterInfo : public LC3GenRegisterInfo {
   /// Debug information queries.
   Register getFrameRegister(const MachineFunction &MF) const override;
 
+  /// Register scavenging; find unused ones
+  /* TODO */
 };
 
 } // end namespace llvm
