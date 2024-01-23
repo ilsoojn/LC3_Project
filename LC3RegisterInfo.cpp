@@ -14,7 +14,7 @@
 
 #include "LC3RegisterInfo.h"
 #include "LC3.h"
-//#include "LC3MachineFunctionInfo.h"
+#include "LC3MachineFunctionInfo.h"
 //#include "LC3Subtarget.h"
 
 #include "llvm/IR/Type.h"

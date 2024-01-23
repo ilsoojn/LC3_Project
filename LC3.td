@@ -24,7 +24,7 @@ include "llvm/Target/Target.td"
 //===----------------------------------------------------------------------===//
 
 //include "LC3CallingConv.td"
-//include "LC3InstrInfo.td"
+include "LC3InstrInfo.td"
 include "LC3RegisterInfo.td"
 //include "LC3Schedule.td"
 
@@ -41,6 +41,11 @@ def LC3AsmParserVariant : AsmParserVariant {
 //===----------------------------------------------------------------------===//
 // LC3 processors supported.
 //===----------------------------------------------------------------------===//
+
+class Proc<string Name, list<SubtargetFeature> Features>
+ : Processor<Name, NoItineraries, Features>;
+
+def : Proc<"generic",         []>;
 
 //===----------------------------------------------------------------------===//
 // Declare the target which we are implementing

@@ -21,6 +21,10 @@
 namespace llvm {
 //    class LC3TargetMachine;
     class FunctionPass;
-
 }  // end namespace llvm
+
+namespace llvm {
+
+} // end namespace llvm
+
 #endif

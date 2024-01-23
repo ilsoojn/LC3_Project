@@ -3,7 +3,7 @@ add_llvm_component_group(LC3)
 set(LLVM_TARGET_DEFINITIONS LC3.td)
 
 # Generate include (.inc) file from the table_decription (.td)
-# tablegen(LLVM LC3GenInstrInfo.inc -gen-instr-info)
+tablegen(LLVM LC3GenInstrInfo.inc -gen-instr-info)
 # tablegen(LLVM LC3GenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM LC3GenRegisterInfo.inc -gen-register-info)
 # tablegen(LLVM LC3GenSubtargetInfo.inc -gen-subtarget)
@@ -14,8 +14,9 @@ add_public_tablegen_target(LC3CommonTableGen)
 add_llvm_target(LC3CodeGen
 #  LC3AsmPrinter.cpp
   LC3RegisterInfo.cpp
+  LC3InstrInfo.cpp
   # LC3Subtarget.cpp
-  # LC3TargetMachine.cpp
+  LC3TargetMachine.cpp
 
   LINK_COMPONENTS
   Analysis
