@@ -1,4 +1,4 @@
-# LC3-Project
+# On-Going LC3-Project
 
 Peronal Project to create a LLVM Backend for Little Computer 3, LC-3.
 
