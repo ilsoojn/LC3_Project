@@ -11,7 +11,7 @@
 
 #include "LC3TargetMachine.h"
 #include "LC3.h"
-// #include "LC3MachineFunctionInfo.h"
+#include "LC3MachineFunctionInfo.h"
 #include "LC3TargetObjectFile.h"
 #include "TargetInfo/LC3TargetInfo.h"
 #include "llvm/CodeGen/Passes.h"
@@ -78,8 +78,8 @@ LC3TargetMachine::~LC3TargetMachine() = default;
 
 void LC3TargetMachine::anchor() { }
 /*
-const SparcSubtarget *
-SparcTargetMachine::getSubtargetImpl(const Function &F) const {
+const LC3Subtarget *
+LC3TargetMachine::getSubtargetImpl(const Function &F) const {
   Attribute CPUAttr = F.getFnAttribute("target-cpu");
   Attribute FSAttr = F.getFnAttribute("target-features");
 
@@ -102,7 +102,7 @@ SparcTargetMachine::getSubtargetImpl(const Function &F) const {
     // creation will depend on the TM and the code generation flags on the
     // function that reside in TargetOptions.
     resetTargetOptions(F);
-    I = std::make_unique<SparcSubtarget>(TargetTriple, CPU, FS, *this,
+    I = std::make_unique<LC3Subtarget>(TargetTriple, CPU, FS, *this,
                                           this->is64Bit);
   }
   return I.get();

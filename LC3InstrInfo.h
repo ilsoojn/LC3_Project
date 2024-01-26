@@ -10,17 +10,20 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_SPARC_SPARCINSTRINFO_H
-#define LLVM_LIB_TARGET_SPARC_SPARCINSTRINFO_H
+#ifndef LLVM_LIB_TARGET_LC3_LC3INSTRINFO_H
+#define LLVM_LIB_TARGET_LC3_LC3INSTRINFO_H
 
-#include "LC3.h"
 #include "LC3RegisterInfo.h"
+#include "LC3.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 
 #define GET_INSTRINFO_HEADER
+// #define GET_INSTRINFO_OPERAND_ENUM
 #include "LC3GenInstrInfo.inc"
 
 namespace llvm {
+
+class LC3Subtarget;
 
 namespace CondCode {
 
@@ -43,9 +46,9 @@ unsigned getBrCond(CondCode CC);
 }
 
 class LC3InstrInfo : public LC3GenInstrInfo {
+    virtual void anchor();
     const LC3RegisterInfo RI;
-//   const LC3Subtarget& Subtarget;
-//   virtual void anchor();
+    const LC3Subtarget& Subtarget;
 public:
     explicit LC3InstrInfo(LC3Subtarget &STI);
 
@@ -54,14 +57,19 @@ public:
     /// always be able to get register info as well (through this method).
     ///
     const LC3RegisterInfo &getRegisterInfo() const { return RI; }
-
+/*
     /// isLoadFromStackSlot - If the specified machine instruction is a direct
     /// load from a stack slot, return the virtual or physical register number of
     /// the destination along with the FrameIndex of the loaded stack slot.  If
     /// not, return 0.  This predicate must return 0 if the instruction has
     /// any side effects other than loading from the stack slot.
     unsigned isLoadFromStackSlot(const MachineInstr &MI,
-                                int &FrameIndex) const override;
+                                int &FrameIndex) const {
+        switch(MI.getOpcode()){
+            default:
+                return 0;
+        }
+    }
 
     /// isStoreToStackSlot - If the specified machine instruction is a direct
     /// store to a stack slot, return the virtual or physical register number of
@@ -118,8 +126,9 @@ public:
 
     // Lower pseudo instructions after register allocation.
     bool expandPostRAPseudo(MachineInstr &MI) const override;
-};
+    */
+}; // end LC3InstrInfo class
 
-}
+} // end namespace llvm
 
 #endif

@@ -61,9 +61,6 @@ let Namespace = "LC3" in {
 //===----------------------------------------------------------------------===//
 
 // General Purpose Register
-def GenRegs : RegisterClass<"LC3", [i16], 16,
-    (add (sequence "R%u", 0, 7))>;
+def GPR : RegisterClass<"LC3", [i16], 16, (add (sequence "R%u", 0, 7))>;
 
-// Processor's Register
-def ProcRegs : RegisterClass<"LC3", [i16], 16, (add SR, PC)>;
-
+def PR   : RegisterClass<"LC3", [i16], 16, (add PC, SR)>;

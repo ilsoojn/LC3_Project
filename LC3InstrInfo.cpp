@@ -10,10 +10,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "LC3InstrInfo.h"
 #include "LC3.h"
-#include "LC3MachineFunctionInfo.h"
+#include "LC3InstrInfo.h"
 #include "LC3Subtarget.h"
+#include "LC3MachineFunctionInfo.h"
+
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/CodeGen/MachineFrameInfo.h"
@@ -28,95 +29,11 @@ using namespace llvm;
 #define GET_INSTRINFO_CTOR_DTOR
 #include "LC3GenInstrInfo.inc"
 
-namespace llvm {
 
-class LC3InstrInfo : public LC3GenInstrInfo {
-    const LC3RegisterInfo RI;
-//   const LC3Subtarget& Subtarget;
-public:
-    explicit LC3InstrInfo(LC3Subtarget &STI);
+// Pin the vtable to this file.
+void LC3InstrInfo::anchor() {}
 
-    /// getRegisterInfo - TargetInstrInfo is a superset of MRegister info.  As
-    /// such, whenever a client has an instance of instruction info, it should
-    /// always be able to get register info as well (through this method).
-    ///
-    const LC3RegisterInfo &getRegisterInfo() const { return RI; }
+LC3InstrInfo::LC3InstrInfo(LC3Subtarget &STI)
+    : LC3GenInstrInfo(LC3::ADJCALLSTACKDOWN, LC3::ADJCALLSTACKUP),
+      Subtarget(STI) {}
 
-    unsigned isLoadFromStackSlot(const MachineInstr &MI,
-                                int &FrameIndex) const {
-        switch(MI.getOpcode()){
-            default:
-                return 0;
-        }
-    }
-
-    /// isStoreToStackSlot - If the specified machine instruction is a direct
-    /// store to a stack slot, return the virtual or physical register number of
-    /// the source reg along with the FrameIndex of the loaded stack slot.  If
-    /// not, return 0.  This predicate must return 0 if the instruction has
-    /// any side effects other than storing to the stack slot.
-    unsigned isStoreToStackSlot(const MachineInstr &MI,
-                                int &FrameIndex) const {
-    }
-
-    MachineBasicBlock *getBranchDestBlock(const MachineInstr &MI) const {
-    }
-
-    bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-                        MachineBasicBlock *&FBB,
-                        SmallVectorImpl<MachineOperand> &Cond,
-                        bool AllowModify = false) const {
-    }
-
-    unsigned removeBranch(MachineBasicBlock &MBB,
-                        int *BytesRemoved = nullptr) const {
-    }
-
-    unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
-                        const DebugLoc &DL,
-                        int *BytesAdded = nullptr) const {
-    }
-
-    bool
-    reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const {
-    }
-
-    /// Determine if the branch target is in range.
-    bool isBranchOffsetInRange(unsigned BranchOpc, int64_t Offset) const {
-    }
-
-    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                    const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
-                    bool KillSrc) const {
-    }
-
-    void storeRegToStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator MBBI, 
-                            Register SrcReg, bool isKill, int FrameIndex,
-                            const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI,
-                            Register VReg) const {
-    }
-
-    void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator MBBI, 
-                            Register DestReg, int FrameIndex, 
-                            const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI,
-                            Register VReg) const {
-    }
-
-    Register getGlobalBaseReg(MachineFunction *MF) const;
-
-    /// GetInstSize - Return the number of bytes of code the specified
-    /// instruction may be.  This returns the maximum number of bytes.
-    unsigned getInstSizeInBytes(const MachineInstr &MI) const {
-    }
-
-    // Lower pseudo instructions after register allocation.
-    bool expandPostRAPseudo(MachineInstr &MI) const {
-    }
-};
-
-}

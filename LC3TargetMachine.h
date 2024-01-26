@@ -14,6 +14,7 @@
 #define LLVM_LIB_TARGET_LC3_LC3TARGETMACHINE_H
 
 #include "LC3.h"
+#include "LC3Subtarget.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/Target/TargetMachine.h"
 #include <optional>

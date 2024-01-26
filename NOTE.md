@@ -44,3 +44,13 @@ RTI     {4: opcode, 000,    000,    000000}
 
 TRAP    {4: opcode, 0b0000, 8: trapvect}
 reserved
+
+#### STUDY NOTE ####
+ErrMsg: 'llvm::LC3GPRRegClassID' was not declared in this scope
+Where we include the <RegisterInfo.inc> file, we need 'GET_REGINFO_ENUM' macro
+    #define GET_REGINFO_ENUM
+    #include "LC3GenRegisterInfo.inc"
+
+ErrMsg: D:/msys64/home/ilsoo/trunk/build/lib/Target/LC3/LC3GenInstrInfo.inc:690:65: error: 'OPERAND_UNKNOWN' is not a member of 'llvm::LC3'; did you mean 'llvm::MCOI::OPERAND_UNKNOWN'?
+
+ErrMsg: 
