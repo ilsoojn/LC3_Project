@@ -48,14 +48,6 @@ static MCAsmInfo *createLC3MCAsmInfo(const MCRegisterInfo &MRI,
   MAI->addInitialFrameState(Inst);
   return MAI;
 }
-// 
-// static MCInstPrinter *createLC3MCInstPrinter(const Triple &T,
-//                                               unsigned SyntaxVariant,
-//                                               const MCAsmInfo &MAI,
-//                                               const MCInstrInfo &MII,
-//                                               const MCRegisterInfo &MRI) {
-//   return new LC3InstPrinter(MAI, MII, MRI);
-// }
 
 static MCRegisterInfo *createLC3MCRegisterInfo(const Triple &TT) {
   MCRegisterInfo *X = new MCRegisterInfo();
@@ -70,24 +62,26 @@ createLC3MCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
   return createLC3MCSubtargetInfoImpl(TT, CPU, /*TuneCPU*/ CPU, FS);
 }
 
-// static MCTargetStreamer *createObjectTargetStreamer(MCStreamer &S, const MCSubtargetInfo &STI) {
-//   return new LC3TargetELFStreamer(S);
-// }
+static MCInstPrinter *createLC3MCInstPrinter(const Triple &T,
+                                              unsigned SyntaxVariant,
+                                              const MCAsmInfo &MAI,
+                                              const MCInstrInfo &MII,
+                                              const MCRegisterInfo &MRI) {
+  return new LC3InstPrinter(MAI, MII, MRI);
+}
 
-// static MCTargetStreamer *createTargetAsmStreamer(MCStreamer &S,
-//                                                  formatted_raw_ostream &OS,
-//                                                  MCInstPrinter *InstPrint,
-//                                                  bool isVerboseAsm) {
-//   return new LC3TargetAsmStreamer(S, OS);
-// }
+static MCTargetStreamer *createTargetAsmStreamer(MCStreamer &S,
+                                                 formatted_raw_ostream &OS,
+                                                 MCInstPrinter *InstPrint,
+                                                 bool isVerboseAsm) {
+  return new LC3TargetAsmStreamer(S, OS);
+}
 
-// static MCInstPrinter *createLC3MCInstPrinter(const Triple &T,
-//                                                unsigned SyntaxVariant,
-//                                                const MCAsmInfo &MAI,
-//                                                const MCInstrInfo &MII,
-//                                                const MCRegisterInfo &MRI) {
-//   return new LC3InstPrinter(MAI, MII, MRI);
-// }
+static MCTargetStreamer *createObjectTargetStreamer(MCStreamer &S, 
+                                                    const MCSubtargetInfo &STI) {
+  return new LC3TargetELFStreamer(S);
+}
+
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeLC3TargetMC() {
   // Register the MC asm info.

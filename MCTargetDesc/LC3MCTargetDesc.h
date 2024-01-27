@@ -29,11 +29,11 @@ class MCSubtargetInfo;
 // class MCTargetOptions;
 class Target;
 
-// MCCodeEmitter *createLC3MCCodeEmitter(const MCInstrInfo &MCII,
-//                                         MCContext &Ctx);
-// MCAsmBackend *createLC3AsmBackend(const Target &T, const MCSubtargetInfo &STI,
-//                                     const MCRegisterInfo &MRI,
-//                                     const MCTargetOptions &Options);
+MCCodeEmitter *createLC3MCCodeEmitter(const MCInstrInfo &MCII,
+                                        MCContext &Ctx);
+MCAsmBackend *createLC3AsmBackend(const Target &T, const MCSubtargetInfo &STI,
+                                    const MCRegisterInfo &MRI,
+                                    const MCTargetOptions &Options);
 // std::unique_ptr<MCObjectTargetWriter> createLC3ELFObjectWriter(bool Is64Bit,
 //                                                                  uint8_t OSABI);
 } // End llvm namespace

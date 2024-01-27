@@ -53,4 +53,4 @@ Where we include the <RegisterInfo.inc> file, we need 'GET_REGINFO_ENUM' macro
 
 ErrMsg: D:/msys64/home/ilsoo/trunk/build/lib/Target/LC3/LC3GenInstrInfo.inc:690:65: error: 'OPERAND_UNKNOWN' is not a member of 'llvm::LC3'; did you mean 'llvm::MCOI::OPERAND_UNKNOWN'?
 
-ErrMsg: 
+ErrMsg: D:/msys64/home/ilsoo/trunk/llvm/lib/Target/LC3/LC3InstrInfo.cpp:37:28: error: 'ADJCALLSTACKDOWN' is not a member of 'llvm::LC3'

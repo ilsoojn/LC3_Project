@@ -127,7 +127,7 @@ def addrPC     : ComplexPattern<iPTR, 1, "SelectAddrI", [frameindex],[]>;    // 
 // ValueType i16imm & timm is from the TargetSelectionDAG.td
 let Defs = [R6], Uses = [R6] in {
 def ADJCALLSTACKDOWN    : LC3PseudoInst<(outs), (ins i16imm:$amt1, i16imm:$amt2),
-                                  "!ADJCALLSTACKDOWN $amt1 $amt2",
+                                  "!ADJCALLSTACKDOWN $amt1",
                                   [(callseq_start timm:$amt1, timm:$amt2)]>;
 def ADJCALLSTACKUP      : LC3PseudoInst<(outs), (ins i16imm:$amt1, i16imm:$amt2),
                                   "!ADJCALLSTACKUP $amt1 $amt2",
