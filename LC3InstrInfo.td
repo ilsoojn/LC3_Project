@@ -37,6 +37,7 @@ include "LC3InstrFormats.td"
 // Type profiles
 // SDTypeProfile < int NumResults, int NumOperands, list<SDTypeConstraint> Constraints >
 //===----------------------------------------------------------------------===//
+def SDT_LC3BranchCC     : SDTypeProfile<0, 2, [SDTCisVT<0, OtherVT>, SDTCisVT<1, i16>]>;
 def SDT_LC3Jump         : SDTypeProfile<0, 1, [SDTCisVT<0, iPTR>]>;
 def SDT_LC3CallSeqStart : SDCallSeqStart<[SDTCisVT<0, i16>]>; // llvm built-in 
 def SDT_LC3CallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<0, i16>]>; // llvm built-in 
@@ -46,12 +47,12 @@ def SDT_LC3CallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<0, i16>]>; //
 // Built-In: brcc, brcond, br, setcc, trap, ld, st ...
 // https://github.com/llvm-mirror/llvm/blob/master/include/llvm/CodeGen/SDNodeProperties.td
 //===----------------------------------------------------------------------===//
+def LC3BRnzp        : SDNode<"LC3ISD::BRnzp", SDT_LC3BranchCC, [SDNPHasChain, SDNPInGlue]>;
 def LC3JumpSub      : SDNode<"LC3ISD::JmpSub", SDT_LC3Jump, [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
 def LC3Jump         : SDNode<"LC3ISD::Jump", SDT_LC3Jump, [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>; 
 def LC3Not          : SDNode<"LC3ISD::NOT", SDTIntBinOp, []>;
 def callseq_start   : SDNode<"ISD::CALLSEQ_START", SDT_LC3CallSeqStart, [SDNPHasChain, SDNPOutGlue]>;
 def callseq_end     : SDNode<"ISD::CALLSEQ_END",   SDT_LC3CallSeqEnd, [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
-
 // LLVM: MachineTypeValue.h // MCCodeEmiter
 
 //===----------------------------------------------------------------------===//
@@ -73,9 +74,12 @@ let OperandType = "OPERAND_PCREL" in {
 }
 
 // Branching Condition Code
-def cc   : Operand<i16>{ 
+def NZP   : Operand<i16>{ 
     let PrintMethod = "printCondCodeOperand";
-    let OperandNamespace = "LC3";
+    // let OperandNamespace = "LC3";
+}
+def BRTarget : Operand<OtherVT> {
+  let EncoderMethod = "getBranchTargetOpValue";
 }
 
     // Address Operands
@@ -199,15 +203,15 @@ defm AND : OpALU<0b0101, "AND", and>;
 //===----------------------------------------------------------------------===//
 //  BRANCH : Unconditional IF NZP <- 111 or 000
 //===----------------------------------------------------------------------===//
-    def BR  : LC3Inst<(outs), (ins MemPcOp:$target, cc:$cc), 
+    def BR  : LC3Inst<(outs), (ins BRTarget:$target, NZP:$condcode), 
                         "BR$cc $target", 
-                        []/*[(brcc bb:$target, LC3imm3:$cc)]*/, FormOther>{
+                        [(LC3BRnzp bb:$target, imm:$condcode)], FormOther>{
 
                         let Opcode = 0b0000;
                         
                         bits<9> target;
-                        bits<3> cc;
-                        let Inst{11-9} = cc; // == n z p condition
+                        bits<3> condcode;
+                        let Inst{11-9} = condcode; // == n z p condition
                         let Inst{8-0} = target;
 
                         let isBranch = 1;
