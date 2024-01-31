@@ -26,9 +26,10 @@
 
 using namespace llvm;
 
+#define DEBUG_TYPE "instrinfo"
+
 #define GET_INSTRINFO_CTOR_DTOR
 #include "LC3GenInstrInfo.inc"
-
 
 // Pin the vtable to this file.
 void LC3InstrInfo::anchor() {}

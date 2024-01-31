@@ -10,6 +10,8 @@
 
 using namespace llvm;
 
+#define DEBUG_TYPE "machinefunctioninfo"
+
 void LC3MachineFunctionInfo::anchor() { }
 
 MachineFunctionInfo *LC3MachineFunctionInfo::clone(

@@ -8,7 +8,10 @@
 
 #include "TargetInfo/LC3TargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+
 using namespace llvm;
+
+#define DEBUG_TYPE "targetinfo"
 
 Target &llvm::getTheLC3Target() {
   static Target TheLC3Target;

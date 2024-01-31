@@ -18,8 +18,10 @@
 #include "llvm/MC/MCSectionELF.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Target/TargetMachine.h"
+
 using namespace llvm;
 
+#define DEBUG_TYPE "targetobjectfile"
 
 void LC3TargetObjectFile::Initialize(MCContext &Ctx, const TargetMachine &TM){
   TargetLoweringObjectFileELF::Initialize(Ctx, TM);

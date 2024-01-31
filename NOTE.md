@@ -1,56 +1,101 @@
 # REGISTERs
 
-There are total 8 general purpose registers, R0 ... R7, and that's it. Since there is no speical processor (status) registers, we decided to use last three GPR as a special register.
+There are total 8 general purpose registers (**GPR**), *R0 ... R7*. That's it.\
+Since there is no speical registers, such as stack pointer, we decided to use last three GPR as a special register.
 
-- R0 // GPR
-- R1 // GPR
-- R2 // GPR
-- R3 // GPR
-- R4 // GPR
-- R5 // FP (Frame Pointer) 
-- R6 // sp : Stack Pointer
+- R5 // FP *(Frame Pointer)*
+- R6 // SP *(Stack Pointer)*
 - R7 // Return Address / Goto Address
 
-As we go thorugh, we may need the special regsiters such as MAR (Memory Adress Register) & MDR (Memory Data Register), as well as, PC and SR (Processor Status Register). We will see...
+We may need the special regsiters such as MAR *(Memory Adress Register)* & MDR *(Memory Data Register)*, in the future.
+PC and SR *(Processor Status Register)* are defined and added in **class PSR**.
 
 # INSTRUCTIONs
 
-INSTR is 16-bits, starting with 4-bits opcode (See README.md "## LC-3 REFERENCE"). Listed all the Instructions set based on InstrFormat.
+ISA is 16-bits, starting with 4-bits opcode (See README.md "## LC-3 REFERENCE").
 
-ADD     {4: opcode, 3: DR,  3: SR1,     000,  3: SR2}
-AND     {4: opcode, 3: DR,  3: SR1,     000,  3: SR2}
-ADD     {4: opcode, 3: DR,  3: SR1,     1, 5: imm5}
-AND     {4: opcode, 3: DR,  3: SR1,     1, 5: imm5}
+<details>
+<summary> <bold> Format & ISA </bold> </summary>
 
-LDR     {4: opcode, 3: DR,  3: BaseR,   6: imm6_offset}
-STR     {4: opcode, 3: SR,  3: BaseR,   6: imm6_offset}
+##### Immediate 6 Format
+| OP    | OPC  | bit_3 | bit_3 | bit_6       |
+| ----- | ---- | :---: | :---: |    :---:    |
+| ADD   | 0001 | DR    | SR_1  | 000 : SR2   |
+| AND   | 0101 | DR    | SR_1  | 000 : SR2   |
+| ADD   | 0001 | DR    | SR_1  | 1 : imm5    |
+| AND   | 0101 | DR    | SR_1  | 1 : imm5    |
+| LDR   | 0110 | DR    | BaseR | imm6_offset |
+| STR   | 0111 | SR    | BaseR | imm6_offset |
+| NOT   | 1001 | DR    | SR_1  | 111111      |
+| JSRR  | 0100 | 000   | BaseR | 000000      |
+| JMP   | 1100 | 000   | BaseR | 000000      |
+| RET   | 1100 | 000   | 111   | 000000      |
+| RTI   | 1000 | 000   | 000   | 000000      |
 
-NOT     {4: opcode, 3: DR,  3: SR,      111111}
+##### Immediate 9 Format
+| OP    | OPC  | bit_3 | bit_9       |
+| ----- | ---- | :---: | :---: |
+| LD    | 0010 | DR    | imm9_offset |
+| LDI   | 1010 | DR    | imm9_offset |
+| LEA   | 1110 | DR    | imm9_offset |
+| ST    | 0011 | SR    | imm9_offset |
+| STI   | 1011 | SR    | imm9_offset |
 
-LD      {4: opcode, 3: DR,  9: imm9_offset}
-LDI     {4: opcode, 3: DR,  9: imm9_offset}
-LEA     {4: opcode, 3: DR,  9: imm9_offset}
-ST      {4: opcode, 3: SR,  9: imm9_offset}
-STI     {4: opcode, 3: SR,  9: imm9_offset}
+##### Branch Format
+| OP    | OPC  | bit_3 | bit_9       |
+| ----- | ---- | :---: | :---: |
+| BR    | 0000 | CC    | imm9_offset |
 
-BR      {4: opcode, 3: CC,  9: imm9_offset}
-JSR     {4: opcode, 1,      11: imm11_offset}
+##### Immediate 11 Format
+| OP    | OPC  | bit_1 | bit_11       |
+| ----- | ---- | :---: | :---: |
+| JSR   | 0100 | 1     | imm11_offset |
 
-JMP     {4: opcode, 000,    3: BaseR,   000000}
-JSRR    {4: opcode, 000,    3: BaseR,   000000}
+##### Trap Format
+| OP    | OPC  | bit_4 | bit_8       |
+| ----- | ---- | :---: | :---: |
+| TRAP  | 1111 | 0000  | 8: trapvect |
 
-RET     {4: opcode, 000,    111,    000000}
-RTI     {4: opcode, 000,    000,    000000}
+</details>
 
-TRAP    {4: opcode, 0b0000, 8: trapvect}
-reserved
+# Pseudo Assembler Directives
 
-#### STUDY NOTE ####
-ErrMsg: 'llvm::LC3GPRRegClassID' was not declared in this scope
-Where we include the <RegisterInfo.inc> file, we need 'GET_REGINFO_ENUM' macro
-    #define GET_REGINFO_ENUM
-    #include "LC3GenRegisterInfo.inc"
+- **.ORIG**     : starting point of LC3 program
+- **.FILL**     : word    - initilised
+- **.BLKW**     : word    - unknown
+- **.STRINGZ**  : string  - initialised
+- **.END**      : end of the program
+- **.EXRNAL**   : external 'library' function call 
+<details>
 
-ErrMsg: D:/msys64/home/ilsoo/trunk/build/lib/Target/LC3/LC3GenInstrInfo.inc:690:65: error: 'OPERAND_UNKNOWN' is not a member of 'llvm::LC3'; did you mean 'llvm::MCOI::OPERAND_UNKNOWN'?
+<summary> <bold> Example (referenced book pg 179) </bold> </summary>
 
-ErrMsg: D:/msys64/home/ilsoo/trunk/llvm/lib/Target/LC3/LC3InstrInfo.cpp:37:28: error: 'ADJCALLSTACKDOWN' is not a member of 'llvm::LC3'
+```
+; DO some_NUMBER multiplies by 6
+        .ORIG   x3050
+        LD  R1, SIX         ; R1 <- SIX         // int SIX = 6;
+        LD  R2, NUMBER      ; R2 <- NUMBER      // int NUMBER = ...?
+        AND R3, R3, #0      ; R3 <- 0
+
+AGAIN   ADD R3,     R3, R2  ; R3 <- R3 + R2     // for(SIX 0) NUMBER += NUMBER;
+        ADD R1,     R1, #-1 ; R1 <- R1 - 1      
+        BRp AGAIN           ; IF(above ADD result R1 0) 
+                            ;   THEN (goto AGAIN) 
+                            ;   ELSE (goto ELSE)
+ELSE    HALT
+
+NUMBER  .BLKW   1           ; save a word with variable NUMBER
+SIX     .FILL   x0006       ; variable SIX holds real number 6
+        .END
+```
+
+</details>
+
+# Personal Note
+
+<details> 
+<summary> Expand Notes </summary>
+
+- Does ***TargetMachine*** put everything together in the ***MY_TARGET*** folder ? ~~class LC3TargetMachine @ LC3.h~~ 
+
+</details>

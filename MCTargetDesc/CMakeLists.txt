@@ -10,7 +10,7 @@ add_llvm_component_library(LLVMLC3Desc
 
   LINK_COMPONENTS
   MC
-  # LC3Info
+  LC3Info
   Support
   # TargetParser
 

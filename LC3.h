@@ -14,12 +14,12 @@
 #ifndef LLVM_LIB_TARGET_LC3_LC3_H
 #define LLVM_LIB_TARGET_LC3_LC3_H
 
-//#include "MCTargetDesc/LC3MCTargetDesc.h"
+#include "MCTargetDesc/LC3MCTargetDesc.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
-//    class LC3TargetMachine;
+    class LC3TargetMachine;
     class FunctionPass;
 }  // end namespace llvm
 

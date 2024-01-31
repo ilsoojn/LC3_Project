@@ -27,6 +27,8 @@
 
 using namespace llvm;
 
+#define DEBUG_TYPE "framelowering"
+
 // hasFP - Return true if the specified function should have a dedicated frame
 // pointer register.  This is true if the function has variable sized allocas,
 // if it needs dynamic stack realignment, if frame pointer elimination is
@@ -40,18 +42,43 @@ bool LC3FrameLowering::hasFP(const MachineFunction &MF) const {
       TRI->hasStackRealignment(MF);
 }
 
+// Adjsut StackPointer by Amount bytes.
+void LC3FrameLowering::adjustStackPtr(MachineFunction &MF,
+                                        MachineBasicBlock &MBB,
+                                        MachineBasicBlock::iterator MBBI,
+                                        int Amount
+                                        ) const {
+  // BuildMI(MachineBasicBlock, MachineInstr, DebugLoc/PCSection, MCInstDesc, DstReg).addReg().addReg/Imm()
+  
+  DebugLoc DL = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
+  const LC3Subtarget &Subtarget = MF.getSubtarget<LC3Subtarget>();
+  const LC3InstrInfo &TII = *static_cast<const LC3InstrInfo *>(Subtarget.getInstrInfo());
+
+  if (isInt<16>(Amount)) // ADD SP, SP, Imm5
+  {
+    BuildMI(MBB, MBBI, DL, TII.get(LC3::ADDri), LC3::SP).addReg(LC3::SP).addImm(Amount);
+  }
+  else { // ADD SP, SP, Reg
+    // unsigned Reg = loadImmediate(Amount, MBB, MBBI, DL, nullptr);
+    unsigned Reg = LC3::R0; // FIXME R0 is temporary
+    BuildMI(MBB, MBBI, DL, TII.get(LC3::ADDrr), LC3::SP).addReg(LC3::SP).addReg(Reg, RegState::Kill);
+  }
+
+} // adjustStackPtr()
+
 // Eliminate ADJCALLSTACKDOWN, ADJCALLSTACKUP pseudo instructions
 MachineBasicBlock::iterator LC3FrameLowering::
 eliminateCallFramePseudoInstr(MachineFunction &MF, MachineBasicBlock &MBB,
                               MachineBasicBlock::iterator I) const {
+  // dynamic alloc
   if (!hasReservedCallFrame(MF)) {
-    MachineInstr &MI = *I;
+  MachineInstr &MI = *I;
     int Size = MI.getOperand(0).getImm();
     if (MI.getOpcode() == LC3::ADJCALLSTACKDOWN)
       Size = -Size;
 
     if (Size)
-      emitSPAdjustment(MF, MBB, I, Size, SP::ADDrr, SP::ADDri);
+      adjustStackPtr(MF, MBB, I, Size);
   }
   return MBB.erase(I);
-}
+} // eliminateCallFramePseudoInstr()

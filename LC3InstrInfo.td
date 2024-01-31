@@ -68,6 +68,7 @@ let OperandType = "OPERAND_PCREL" in {
     def PCoffset11: Operand<i16>, ImmLeaf<i16, [{ return Imm >= 0 && Imm < 2048; }]>;
     def PCoffset9 : Operand<i16>, ImmLeaf<i16, [{ return Imm >= 0 && Imm < 512; }]>;
     def PCoffset6 : Operand<i16>, ImmLeaf<i16, [{ return Imm >= 0 && Imm < 64; }]>;
+    def TrapVect8 : Operand<i16>, ImmLeaf<i16, [{ return Imm >= 0 && Imm < 256; }]>;
     def JsrTarget   : Operand<OtherVT> { let EncoderMethod = "getJumpTargetOpValue"; }
 }
 
@@ -75,18 +76,17 @@ let OperandType = "OPERAND_PCREL" in {
 def cc   : Operand<i16>{ 
     let PrintMethod = "printCondCodeOperand";
     let OperandNamespace = "LC3";
-    let OperandType ="OPERAND_UNKNOWN"; // TODO
 }
 
-// Address Operands
-def LC3MemBaseAsmOperand  : AsmOperandClass {
-    let Name = "MemBaseOp";
-    let ParserMethod = "parseMemOperand";
-}
-def LC3MemPcAsmOperand  : AsmOperandClass {
-    let Name = "MemPcOp";
-    let ParserMethod = "parseMemOperand";
-}
+    // Address Operands
+    def LC3MemBaseAsmOperand  : AsmOperandClass {
+        let Name = "MemBaseOp";
+        let ParserMethod = "parseMemOperand";
+    }
+    def LC3MemPcAsmOperand  : AsmOperandClass {
+        let Name = "MemPcOp";
+        let ParserMethod = "parseMemOperand";
+    }
 
 let OperandType = "OPERAND_MEMORY" in {
     class LC3MemOperand<RegisterClass RC> : RegisterOperand<RC>;
@@ -94,7 +94,7 @@ let OperandType = "OPERAND_MEMORY" in {
     def MemBaseOp   : Operand<iPTR>{
         let PrintMethod = "printMemOperand";        // from LC3InstPrinter.cpp
         let ParserMatchClass = LC3MemBaseAsmOperand;    // from LC3AsmParser.cpp
-        let MIOperandInfo = (ops ptr_rc, PCoffset6); // ptr_rc from Target.td (register for pointer?)
+        let MIOperandInfo = (ops ptr_rc, PCoffset6); // ptr_rc from Target_td (register for pointer?)
     }
     def MemPcOp     : Operand<iPTR>{
         let PrintMethod = "printMemOperand";        // from LC3InstPrinter.cpp
@@ -122,10 +122,10 @@ def addrPC     : ComplexPattern<iPTR, 1, "SelectAddrI", [frameindex],[]>;    // 
 //  Pseudo
 //===----------------------------------------------------------------------===//
 
-// What are they? "adjust Stack or SP" may rely on?
+// What are they? "adjust Stack or SP(R6)" may rely on?
 // Set before and after the “for loop”
 // ValueType i16imm & timm is from the TargetSelectionDAG.td
-let Defs = [R6], Uses = [R6] in {
+let Defs = [SP], Uses = [SP] in {
 def ADJCALLSTACKDOWN    : LC3PseudoInst<(outs), (ins i16imm:$amt1, i16imm:$amt2),
                                   "!ADJCALLSTACKDOWN $amt1",
                                   [(callseq_start timm:$amt1, timm:$amt2)]>;
@@ -182,6 +182,7 @@ let Defs = [SR] in {
     } // multiclass OpALU
 } // Defs = [SR]
 
+// IR defined in include/llvm/Target/TargetSelectionDAG.td
 defm ADD : OpALU<0b0001, "ADD", add>;
 defm AND : OpALU<0b0101, "AND", and>;
 
@@ -234,20 +235,20 @@ let isBranch = 1, isTerminator = 1, isReturn = 1, isBarrier = 1 in {
     }
     // def RET : LC3Return<0b1100, (outs), (ins), "RET", []>{
     //     let imm3 = 0b111;
-    // }// RET : PC <- R7
+    // }// RET : PC <- LR(R7)
 
     // def RTI : LC3Return<0b1000, (outs), (ins), "RTI", []>{
     //     let imm3 = 0b000;
     // }
     // RTI : IF SR[15] == 0, 
-    //          THEN PC <- [R6], TMP <- [R6++], R6++, SR <- TMP. 
+    //          THEN PC <- [SP(R6)], TMP <- [SP(R6)++], SP(R6)++, SR <- TMP. 
     //          ELSE "Initiate a privilege mode excpetion"
     //       PC, SR <- Two value is Popped out of the Stack
 }
 //===----------------------------------------------------------------------===//
 //  JMP         :   Unconditional Jmp
 //  JSR & JSRR  :   Jump to SubRoutine
-//                  R7 = PC, Then GOTO... the label.
+//                  LR(R7) = PC, Then GOTO... the label.
 //===----------------------------------------------------------------------===//
 let isTerminator = 1, isCall = 1, isBranch = 1 in {
 
@@ -263,14 +264,14 @@ let isTerminator = 1, isCall = 1, isBranch = 1 in {
                         [(LC3JumpSub PCoffset11:$target)]>{
                             bits<11> target;
                             let PCoffset11 = target;
-                        }// JSR target : R7 = PC & PC = PC + SExt(target)
+                        }// JSR target : LR(R7) = PC & PC = PC + SExt(target)
 
     def JSRR : LC3Base6<0b0100, (outs), (ins GPR:$base),
                         "JSR $base", 
                         [(LC3JumpSub GPR:$base)]>{
                             let reg = 0b000;
                             let Inst{5-0} = 0b000000;
-                        }// JSRR Rn : R7 = PC & PC = Rn
+                        }// JSRR Rn : LR(R7) = PC & PC = Rn
 }
 
 //===----------------------------------------------------------------------===//
@@ -318,7 +319,7 @@ def STI : Store<0b1011, "STI">; // [[PC + PCoffset9]] <- reg
 // [base + offset6] <- reg
 def STR : LC3Base6<0b0111, (outs), (ins GPR:$reg, MemReg:$base, PCoffset6:$offset6),
                         "STR\t$reg,\t$base, $offset6",
-                        [(store i16:$reg, (ptradd MemReg:$base, PCoffset6:$offset6))]>
+                        [(store i16:$reg, (ptradd i16:$base, PCoffset6:$offset6))]>
                         {
                             bits<6> offset6;
                             let Inst{5-0} = offset6;
@@ -333,3 +334,8 @@ let Defs = [SR] in {
                     "LEA\t$reg, $PCoffset9",
                     [(set GPR:$reg,  addrPC:$PCoffset9)]>;
 } // Defs = [SR] for LEA
+
+//===----------------------------------------------------------------------===//
+//  TRAP
+//===----------------------------------------------------------------------===//
+

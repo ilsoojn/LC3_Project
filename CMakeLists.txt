@@ -18,7 +18,8 @@ add_public_tablegen_target(LC3CommonTableGen)
 
 # LC3CodeGen should match with LLVMBuild.txt LC3CodeGen
 add_llvm_target(LC3CodeGen
-#  LC3AsmPrinter.cpp
+  LC3AnalyseHelper.cpp
+  #LC3AsmPrinter.cpp
   LC3RegisterInfo.cpp
   LC3InstrInfo.cpp
   
@@ -52,3 +53,5 @@ add_llvm_target(LC3CodeGen
 # Should match with "subdirectories =  MCTargetDesc TargetInfo" in LLVMBuild.txt
 add_subdirectory(TargetInfo)
 add_subdirectory(MCTargetDesc)
+# add_subdirectory(AsmParser)
+# add_subdirectory(Disassembler)

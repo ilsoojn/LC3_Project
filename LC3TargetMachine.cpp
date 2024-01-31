@@ -21,7 +21,7 @@
 
 using namespace llvm;
 
-#define DEBUG_TYPE "lc3TargetMachine"
+#define DEBUG_TYPE "targetmachine"
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeLC3Target() {
   // Register the target.

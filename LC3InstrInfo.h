@@ -18,7 +18,6 @@
 #include "llvm/CodeGen/TargetInstrInfo.h"
 
 #define GET_INSTRINFO_HEADER
-// #define GET_INSTRINFO_OPERAND_ENUM
 #include "LC3GenInstrInfo.inc"
 
 namespace llvm {

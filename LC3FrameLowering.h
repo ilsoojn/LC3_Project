@@ -33,11 +33,16 @@ public:
   /// frame pointer register. For most targets this is true only if the function
   /// has variable sized allocas or if frame pointer elimination is disabled.
   bool hasFP(const MachineFunction &MF) const override;
+  
   MachineBasicBlock::iterator
   eliminateCallFramePseudoInstr(MachineFunction &MF,
                                 MachineBasicBlock &MBB,
                                 MachineBasicBlock::iterator I) const override;
 
+  void adjustStackPtr(MachineFunction &MF,
+                        MachineBasicBlock &MBB,
+                        MachineBasicBlock::iterator MBBI,
+                        int Amount) const;
 };
 
 } // End llvm namespace

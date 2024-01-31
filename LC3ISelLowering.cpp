@@ -32,18 +32,16 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
+
 using namespace llvm;
 
+#define DEBUG_TYPE "isellowering"
 
 //===----------------------------------------------------------------------===//
 // Calling Convention Implementation
 //===----------------------------------------------------------------------===//
 
 // #include "LC3GenCallingConv.inc"
-
-// The calling conventions in LC3CallingConv.td are described in terms of the
-// callee's register window. This function translates registers to the
-// corresponding caller window %o register.
 
 //===----------------------------------------------------------------------===//
 // TargetLowering Implementation

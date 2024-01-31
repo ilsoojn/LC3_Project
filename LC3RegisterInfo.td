@@ -43,17 +43,16 @@ let Namespace = "LC3" in {
     def R2  :   LC3GPReg<2, "R2">;
     def R3  :   LC3GPReg<3, "R3">;
     def R4  :   LC3GPReg<4, "R4">;
-    def R5  :   LC3GPReg<5, "R5">;    // FP : Frame Pointer
-    def R6  :   LC3GPReg<6, "R6">;    // SP : Stack Pointer
-    def R7  :   LC3GPReg<7, "R7">;    // Return Addr / Goto Addr for RET/JSR
+    def FP  :   LC3GPReg<5, "R5">;    // FP : Frame Pointer
+    def SP  :   LC3GPReg<6, "R6">;    // SP : Stack Pointer
+    def LR  :   LC3GPReg<7, "R7">;    // LR : Linking Register - Return Addr / Goto Addr for RET/JSR
 
     // Special Registers (Status / Processor)
     // def MAR  :   Register<, "MAR">;
     // def MDR  :   Register<, "MDR">;
     
     def PC  :   LC3PReg<0, "PC">;
-    // Processor Status Register. [15: privilege mode, 2: conditional N, 1: conditional Z, 0: conditional P]
-    def SR :   LC3PReg<1, "SR">;  
+    def SR  :   LC3PReg<1, "SR">;  // Status Register. [15: privilege mode, 2: conditional N, 1: conditional Z, 0: conditional P]
 }
 
 //===----------------------------------------------------------------------===//
@@ -61,6 +60,6 @@ let Namespace = "LC3" in {
 //===----------------------------------------------------------------------===//
 
 // General Purpose Register
-def GPR : RegisterClass<"LC3", [i16], 16, (add (sequence "R%u", 0, 7))>;
+def GPR : RegisterClass<"LC3", [i16], 16, (add (sequence "R%u", 0, 4), FP, SP, LR)>;
 
-def PR   : RegisterClass<"LC3", [i16], 16, (add PC, SR)>;
+def PSR : RegisterClass<"LC3", [i16], 16, (add PC, SR)>;

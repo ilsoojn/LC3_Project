@@ -21,7 +21,7 @@
 
 using namespace llvm;
 
-#define DEBUG_TYPE "lc3-subtarget"
+#define DEBUG_TYPE "subtarget"
 
 #define GET_SUBTARGETINFO_TARGET_DESC
 #define GET_SUBTARGETINFO_CTOR
