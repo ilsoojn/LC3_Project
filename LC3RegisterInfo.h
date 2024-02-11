@@ -29,7 +29,6 @@ struct LC3RegisterInfo : public LC3GenRegisterInfo {
   
   const TargetRegisterClass *getPointerRegClass(const MachineFunction &MF,
                                                 unsigned Kind) const override;
-
   BitVector getReservedRegs(const MachineFunction &MF) const override;
 
   /// Stack Frame Processing Methods

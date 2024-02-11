@@ -9,14 +9,14 @@
 // This describes the calling conventions for LC3 architecture.
 //===----------------------------------------------------------------------===//
 
-/*
+// error: Variable not defined: 'R0'
 /// CCIfSubtarget - Match if the current subtarget has a feature F.
 class CCIfSubtarget<string F, CCAction A>:
   CCIf<!strconcat("State.getTarget().getSubtarget<LC3Subtarget>().", F), A>;
 
 def CC_LC3 : CallingConv<[
-  CCIfType<[i16], CCAssignToReg<[R0, R1, R2, R3, R4]>>;
-  CCAssignToStack<5, 2>; // <int size, int align_byte>
+  CCIfType<[i16], CCAssignToReg<[R0, R1, R2, R3, R4]>>,
+  CCAssignToStack<5, 2> // <int size, int align_byte>
 ]>;
 
 /// CCDelegateTo - This action invokes the specified sub-calling-convention.  
@@ -26,4 +26,3 @@ def RetCC_LC3 : CallingConv<[
 ]>;
 
 def CSR : CalleeSavedRegs<(add LR, FP, (sequence "R%u", 0, 4))>;
-*/ // error: Variable not defined: 'R0'

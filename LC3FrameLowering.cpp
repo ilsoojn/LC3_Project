@@ -46,7 +46,7 @@ bool LC3FrameLowering::hasFP(const MachineFunction &MF) const {
 void LC3FrameLowering::adjustStackPtr(MachineFunction &MF,
                                         MachineBasicBlock &MBB,
                                         MachineBasicBlock::iterator MBBI,
-                                        int Amount
+                                        int16_t Amount
                                         ) const {
   // BuildMI(MachineBasicBlock, MachineInstr, DebugLoc/PCSection, MCInstDesc, DstReg).addReg().addReg/Imm()
   
@@ -59,8 +59,7 @@ void LC3FrameLowering::adjustStackPtr(MachineFunction &MF,
     BuildMI(MBB, MBBI, DL, TII.get(LC3::ADDri), LC3::SP).addReg(LC3::SP).addImm(Amount);
   }
   else { // ADD SP, SP, Reg
-    // unsigned Reg = loadImmediate(Amount, MBB, MBBI, DL, nullptr);
-    unsigned Reg = LC3::R0; // FIXME R0 is temporary
+    Register Reg = STI.getInstrInfo()->loadImmediate(MBB, MBBI, DL, Amount);
     BuildMI(MBB, MBBI, DL, TII.get(LC3::ADDrr), LC3::SP).addReg(LC3::SP).addReg(Reg, RegState::Kill);
   }
 

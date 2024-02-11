@@ -31,7 +31,7 @@ const LC3AnalyseHelper::InstSequence
         // Immediate 5
         case LC3::ADDri:
         case LC3::ANDri:
-            if(opndi < 32)
+            if(isIntN(5, opndi))
             {
                 InstSeq.push_back(Inst(opcode, opndi));
             }
@@ -46,7 +46,7 @@ const LC3AnalyseHelper::InstSequence
         // Immediate 6
         case LC3::LDR:
         case LC3::STR:
-            if(opndi < 64)
+            if(isIntN(6, opndi))
             break;
         
         // Immediate 9
@@ -56,12 +56,12 @@ const LC3AnalyseHelper::InstSequence
         case LC3::LDI:
         case LC3::ST:
         case LC3::STI:
-            if(opndi < 512)
+            if(isIntN(9, opndi))
             break;
 
         // Immediate 11
         case LC3::JSR:
-            if(opndi < 2048)
+            if(isIntN(11, opndi))
             break;
         
     }// switch(opcode)

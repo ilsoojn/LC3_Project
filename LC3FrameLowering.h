@@ -21,8 +21,10 @@ namespace llvm {
 
 class LC3Subtarget;
 class LC3FrameLowering : public TargetFrameLowering {
+protected:
+  const LC3Subtarget &STI;
 public:
-  explicit LC3FrameLowering(const LC3Subtarget &ST);
+  explicit LC3FrameLowering(const LC3Subtarget &STI);
 
   /// emitProlog/emitEpilog - These methods insert prolog and epilog code into
   /// the function.
@@ -42,7 +44,7 @@ public:
   void adjustStackPtr(MachineFunction &MF,
                         MachineBasicBlock &MBB,
                         MachineBasicBlock::iterator MBBI,
-                        int Amount) const;
+                        int16_t Amount) const;
 };
 
 } // End llvm namespace

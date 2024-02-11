@@ -15,7 +15,11 @@
 
 #include "LC3RegisterInfo.h"
 #include "LC3.h"
+#include "llvm/CodeGen/MachineInstr.h"
+#include "llvm/CodeGen/MachineOperand.h"
+#include "llvm/CodeGen/Register.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
+#include <cstdint>
 
 #define GET_INSTRINFO_HEADER
 #include "LC3GenInstrInfo.inc"
@@ -24,30 +28,41 @@ namespace llvm {
 
 class LC3Subtarget;
 
-namespace CondCode {
+#define NZP flase
+namespace LC3CC {
 
-// NZP
-enum CondCode {
-    COND_n,    // a < 0
-    COND_nz,   // a <= 0
-    COND_z,    // a = 0
-    COND_zp,   // a >= 0
-    COND_p,    // a > 0
-    COND_np,   // a != 0
-    COND_nzp,  // Unconditional Branching
-    COND_,     // Unconditional Branching
-    COND_INVALID
-};
-
-CondCode getOppositeBrCond(CondCode);
-unsigned getBrCond(CondCode CC);
+    #if NZP
+    enum CondCodes {
+        BN = 4,    // 0b_100 a < 0
+        BNZ = 6,   // 0b_110 a <= 0
+        BZ = 2,    // 0b_010 a = 0
+        BZP = 3,   // 0b_011 a >= 0
+        BP = 1,    // 0b_001 a > 0
+        BNP = 5,   // 0b_101 a != 0
+        BNZP = 7,  // 0b_111 Unconditional Branching
+        BINVALID
+    };
+    #else
+    enum CondCodes {
+        BL = 4,    // 0b_100 a < 0
+        BLE = 6,   // 0b_110 a <= 0
+        BEQ= 2,    // 0b_010 a = 0
+        BGE = 3,   // 0b_011 a >= 0
+        BG = 1,    // 0b_001 a > 0
+        BNE = 5,   // 0b_101 a != 0
+        BUNCOND = 7,  // 0b_111 Unconditional Branching
+        BINVALID
+    };
+    #endif
 
 }
 
 class LC3InstrInfo : public LC3GenInstrInfo {
+
     virtual void anchor();
     const LC3RegisterInfo RI;
     const LC3Subtarget& Subtarget;
+
 public:
     explicit LC3InstrInfo(LC3Subtarget &STI);
 
@@ -56,19 +71,14 @@ public:
     /// always be able to get register info as well (through this method).
     ///
     const LC3RegisterInfo &getRegisterInfo() const { return RI; }
-/*
+
     /// isLoadFromStackSlot - If the specified machine instruction is a direct
     /// load from a stack slot, return the virtual or physical register number of
     /// the destination along with the FrameIndex of the loaded stack slot.  If
     /// not, return 0.  This predicate must return 0 if the instruction has
     /// any side effects other than loading from the stack slot.
     unsigned isLoadFromStackSlot(const MachineInstr &MI,
-                                int &FrameIndex) const {
-        switch(MI.getOpcode()){
-            default:
-                return 0;
-        }
-    }
+                                int &FrameIndex) const override;
 
     /// isStoreToStackSlot - If the specified machine instruction is a direct
     /// store to a stack slot, return the virtual or physical register number of
@@ -77,6 +87,62 @@ public:
     /// any side effects other than storing to the stack slot.
     unsigned isStoreToStackSlot(const MachineInstr &MI,
                                 int &FrameIndex) const override;
+
+    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                    const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
+                    bool KillSrc) const override;
+
+    void storeRegToStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI,
+                            Register SrcReg, bool isKill, int FrameIndex,
+                            const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI, Register VReg) const override {
+        storeRegToStack(MBB, MBBI, SrcReg, isKill, FrameIndex, RC, TRI, 0);
+    }
+
+    void storeRegToStack(MachineBasicBlock &MBB,
+                        MachineBasicBlock::iterator MBBI, 
+                        Register SrcReg, bool isKill, int FrameIndex,
+                        const TargetRegisterClass *RC,
+                        const TargetRegisterInfo *TRI,
+                        int16_t Offset) const;
+
+    void loadRegFromStackSlot(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI,
+                            Register DestReg, int FrameIndex,
+                            const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI, Register VReg) const override {
+        loadRegFromStack(MBB, MBBI, DestReg, FrameIndex, RC, TRI, 0);
+    }
+
+    void loadRegFromStack(MachineBasicBlock &MBB,
+                            MachineBasicBlock::iterator MBBI, 
+                            Register DestReg, int FrameIndex, 
+                            const TargetRegisterClass *RC,
+                            const TargetRegisterInfo *TRI,                            int16_t Offset) const;
+
+
+    /// GetInstSize - Return the number of bytes of code the specified
+    /// instruction may be.  This returns the maximum number of bytes.
+    unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+
+    // absent of MOV Reg #Imm, we use ADD instead
+    Register loadImmediate(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                            const DebugLoc &DL, int16_t Imm) const;
+
+    //===----------------------------------------------------------------------===//
+    //                            BRANCH INSTRUCTION                              //
+    //===----------------------------------------------------------------------===//
+    const MCInstrDesc &getBrCond(LC3CC::CondCodes CC) const;
+    
+    LC3CC::CondCodes getBrCond(MachineOperand MachineOperand) const;
+
+    LC3CC::CondCodes getOppositeBranchCondition(LC3CC::CondCodes CC) const;
+    
+    bool reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+
+    /// Determine if the branch target is in range (offset for JSR and BR)
+    bool isBranchOffsetInRange(unsigned BRCC, int64_t Offset) const override;
 
     MachineBasicBlock *getBranchDestBlock(const MachineInstr &MI) const override;
 
@@ -93,39 +159,6 @@ public:
                         const DebugLoc &DL,
                         int *BytesAdded = nullptr) const override;
 
-    bool
-    reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
-
-    /// Determine if the branch target is in range.
-    bool isBranchOffsetInRange(unsigned BranchOpc, int64_t Offset) const override;
-
-    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-                    const DebugLoc &DL, MCRegister DestReg, MCRegister SrcReg,
-                    bool KillSrc) const override;
-
-    void storeRegToStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator MBBI, 
-                            Register SrcReg, bool isKill, int FrameIndex,
-                            const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI,
-                            Register VReg) const override;
-
-    void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator MBBI, 
-                            Register DestReg, int FrameIndex, 
-                            const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI,
-                            Register VReg) const override;
-
-    Register getGlobalBaseReg(MachineFunction *MF) const;
-
-    /// GetInstSize - Return the number of bytes of code the specified
-    /// instruction may be.  This returns the maximum number of bytes.
-    unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
-
-    // Lower pseudo instructions after register allocation.
-    bool expandPostRAPseudo(MachineInstr &MI) const override;
-    */
 }; // end LC3InstrInfo class
 
 } // end namespace llvm

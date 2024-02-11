@@ -27,6 +27,7 @@
 #include "llvm/CodeGen/SelectionDAG.h"
 #include "llvm/CodeGen/SelectionDAGNodes.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
+#include "llvm/IR/CallingConv.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
@@ -41,7 +42,7 @@ using namespace llvm;
 // Calling Convention Implementation
 //===----------------------------------------------------------------------===//
 
-// #include "LC3GenCallingConv.inc"
+#include "LC3GenCallingConv.inc"
 
 //===----------------------------------------------------------------------===//
 // TargetLowering Implementation

@@ -23,9 +23,9 @@ include "llvm/Target/Target.td"
 // Register, Calling Conv, Instruction Descriptions
 //===----------------------------------------------------------------------===//
 
-// include "LC3CallingConv.td"
 include "LC3RegisterInfo.td"
 include "LC3InstrInfo.td"
+include "LC3CallingConv.td"
 //include "LC3Schedule.td"
 
 def LC3InstrInfo : InstrInfo;

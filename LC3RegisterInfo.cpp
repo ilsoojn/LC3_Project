@@ -43,16 +43,16 @@ LC3RegisterInfo::LC3RegisterInfo() : LC3GenRegisterInfo(LC3::LR) {}
 const MCPhysReg *
 LC3RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const 
 {
-    // return CSR_SaveList;
-    return nullptr;
+    return CSR_SaveList;
+    // return nullptr;
 }
 
 const uint32_t *
 LC3RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                     CallingConv::ID CC) const 
 {
-    // return CSR_RegMask;
-    return nullptr;
+    return CSR_RegMask;
+    // return nullptr;
 }
 
 const TargetRegisterClass *LC3RegisterInfo::
