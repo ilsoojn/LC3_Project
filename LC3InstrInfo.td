@@ -47,8 +47,8 @@ def SDT_LC3CallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<0, i16>]>; //
 // Built-In: brcc, brcond, br, setcc, trap, ld, st ...
 // https://github.com/llvm-mirror/llvm/blob/master/include/llvm/CodeGen/SDNodeProperties.td
 //===----------------------------------------------------------------------===//
-def LC3BRnzp        : SDNode<"LC3ISD::BRnzp", SDT_LC3BranchCC, [SDNPHasChain, SDNPInGlue]>;
-def LC3JumpSub      : SDNode<"LC3ISD::JmpSub", SDT_LC3Jump, [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
+def LC3BRnzp        : SDNode<"LC3ISD::BRNZP", SDT_LC3BranchCC, [SDNPHasChain, SDNPInGlue]>;
+def LC3JumpSub      : SDNode<"LC3ISD::JMPSUB", SDT_LC3Jump, [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
 def LC3Jump         : SDNode<"LC3ISD::JUMP", SDT_LC3Jump, [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>; 
 def LC3Not          : SDNode<"LC3ISD::NOT", SDTIntBinOp, []>;
 def callseq_start   : SDNode<"ISD::CALLSEQ_START", SDT_LC3CallSeqStart, [SDNPHasChain, SDNPOutGlue]>;
