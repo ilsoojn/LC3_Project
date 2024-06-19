@@ -77,7 +77,7 @@ LC3TargetMachine::LC3TargetMachine(const Target &T, const Triple &TT,
 LC3TargetMachine::~LC3TargetMachine() = default;
 
 void LC3TargetMachine::anchor() { }
-/*
+
 const LC3Subtarget *
 LC3TargetMachine::getSubtargetImpl(const Function &F) const {
   Attribute CPUAttr = F.getFnAttribute("target-cpu");
@@ -88,6 +88,8 @@ LC3TargetMachine::getSubtargetImpl(const Function &F) const {
   std::string FS =
       FSAttr.isValid() ? FSAttr.getValueAsString().str() : TargetFS;
 
+/* 
+// Question: what is 'use-soft-float' attribute at line 95 ?
   // FIXME: This is related to the code below to reset the target options,
   // we need to know whether or not the soft float flag is set on the
   // function, so we can enable it as a subtarget feature.
@@ -95,6 +97,8 @@ LC3TargetMachine::getSubtargetImpl(const Function &F) const {
 
   if (softFloat)
     FS += FS.empty() ? "+soft-float" : ",+soft-float";
+// QuestionEnd
+*/
 
   auto &I = SubtargetMap[CPU + FS];
   if (!I) {
@@ -102,12 +106,11 @@ LC3TargetMachine::getSubtargetImpl(const Function &F) const {
     // creation will depend on the TM and the code generation flags on the
     // function that reside in TargetOptions.
     resetTargetOptions(F);
-    I = std::make_unique<LC3Subtarget>(TargetTriple, CPU, FS, *this,
-                                          this->is64Bit);
+    I = std::make_unique<LC3Subtarget>(CPU, FS, *this);
   }
   return I.get();
 }
-
+/*
 MachineFunctionInfo *LC3TargetMachine::createMachineFunctionInfo(
     BumpPtrAllocator &Allocator, const Function &F,
     const TargetSubtargetInfo *STI) const {
@@ -126,6 +129,9 @@ public:
     LC3TargetMachine &getLC3TargetMachine() const {
         return getTM<LC3TargetMachine>();
     }
+    const LC3Subtarget &getLC3Subtarget() const {
+    return *getLC3TargetMachine().getSubtargetImpl();
+    }
 
     void addIRPasses() override;
     bool addInstSelector() override;
@@ -139,13 +145,13 @@ TargetPassConfig *LC3TargetMachine::createPassConfig(PassManagerBase &PM) {
 }
 
 void LC3PassConfig::addIRPasses() {
-    addPass(createAtomicExpandPass());
+    // addPass(createAtomicExpandPass());
 
     TargetPassConfig::addIRPasses();
 }
 
 bool LC3PassConfig::addInstSelector() {
-//   addPass(createLC3ISelDag(getLC3TargetMachine()/*getOptLevel()*/));
+    addPass(createLC3ISelDag(getLC3TargetMachine()/*getOptLevel()*/));
     return false;
 }
 
