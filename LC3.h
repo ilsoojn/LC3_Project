@@ -15,12 +15,20 @@
 #define LLVM_LIB_TARGET_LC3_LC3_H
 
 #include "MCTargetDesc/LC3MCTargetDesc.h"
+#include "llvm/PassRegistry.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
     class LC3TargetMachine;
+    class LC3Subtarget;
     class FunctionPass;
+    class MachineInst;
+    class PassRegistry;
+
+    FunctionPass *createLC3ISelDag(LC3TargetMachine &TM);
+    void initializeLC3DAGToDAGISelPass(PassRegistry &PR);
+
 }  // end namespace llvm
 
 namespace llvm {

@@ -15,7 +15,6 @@
 #define LLVM_LIB_TARGET_LC3_LC3ISELLOWERING_H
 
 #include "LC3.h"
-#include "LC3TargetMachine.h"
 #include "llvm/CodeGen/TargetLowering.h"
 
 namespace llvm {
@@ -67,15 +66,15 @@ class LC3TargetMachine;
     /// If the address space cannot be determined, it will be -1.
     ///
     /// TODO: Remove default argument
-    bool isLegalAddressingMode(const DataLayout &DL, const AddrMode &AM, 
-                              Type *Ty, unsigned AS,
-                              Instruction *I = nullptr) const override;
+    // bool isLegalAddressingMode(const DataLayout &DL, const AddrMode &AM, 
+    //                           Type *Ty, unsigned AS,
+    //                           Instruction *I = nullptr) const override;
 
     /// Returns true if the specified base+offset is a legal indexed addressing
     /// mode for this target. \p MI is the load or store instruction that is being
     /// considered for transformation.
-    virtual bool isIndexingLegal(MachineInstr &MI, Register Base, Register Offset,
-                                bool IsPre, MachineRegisterInfo &MRI) const override;
+    // virtual bool isIndexingLegal(MachineInstr &MI, Register Base, Register Offset,
+    //                             bool IsPre, MachineRegisterInfo &MRI) const override;
 
 /*
     /// Return true if folding a constant offset with the given GlobalAddress is

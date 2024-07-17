@@ -9,7 +9,7 @@ tablegen(LLVM LC3GenSubtargetInfo.inc -gen-subtarget)
 # tablegen(LLVM LC3GenAsmMatcher.inc -gen-asm-matcher)
 # tablegen(LLVM LC3GenAsmWriter.inc -gen-asm-writer)
 tablegen(LLVM LC3GenCallingConv.inc -gen-callingconv)
-# tablegen(LLVM LC3GenDAGISel.inc -gen-dag-isel)
+tablegen(LLVM LC3GenDAGISel.inc -gen-dag-isel)
 # tablegen(LLVM LC3GenDisassemblerTables.inc -gen-disassembler)
 # tablegen(LLVM LC3GenMCCodeEmitter.inc -gen-emitter)
 # tablegen(LLVM LC3GenMCPseudoLowering.inc -gen-pseudo-lowering)
@@ -28,7 +28,7 @@ add_llvm_target(LC3CodeGen
   LC3MachineFunctionInfo.cpp
   LC3TargetObjectFile.cpp
 
-  # LC3ISelDAGToDAG.cpp
+  LC3ISelDAGToDAG.cpp
   LC3ISelLowering.cpp
   LC3FrameLowering.cpp
   # LC3MCInstLower.cpp

@@ -97,7 +97,6 @@ void LC3InstrInfo::copyPhysReg(MachineBasicBlock &MBB,
   llvm_unreachable("Cannot copy register");
 }
 
-
 void LC3InstrInfo::storeRegToStack(MachineBasicBlock &MBB, MachineBasicBlock::iterator I, 
                         Register SrcReg, bool isKill, int FrameIndex,
                         const TargetRegisterClass *RC, const TargetRegisterInfo *TRI, 

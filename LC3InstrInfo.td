@@ -124,9 +124,9 @@ let OperandType = "OPERAND_MEMORY" in {
 //  def not :   Patfrag<(ops node:$in), (xor node:$in, -1)>;
 //                               not $in = xor $in, -1              ???
 //===----------------------------------------------------------------------===//
-def addrBase    : ComplexPattern<iPTR, 2, "SelectAddrRI", [],[]>;   // <- BaseReg[x] + Immediate Offset
-def addrPC      : ComplexPattern<iPTR, 1, "SelectAddrI", [frameindex],[]>;    // <- PC + Immediate Offset
-def ADDRESS     : ComplexPattern<iPTR, 2, "SelectAddr", [frameindex],[SDNPWantParent]>; // frameIndex match for Load/Store from Stack
+def addrBase    : ComplexPattern<iPTR, 2, "SelectAddrRegImm", [],[]>;   // <- BaseReg[x] + Immediate Offset
+def addrPC      : ComplexPattern<iPTR, 1, "SelectAddr", [frameindex],[]>;    // <- PC + Immediate Offset
+def ADDRESS     : ComplexPattern<iPTR, 2, "SelectAddrRegReg", [frameindex],[SDNPWantParent]>; // frameIndex match for Load/Store from Stack
 
 //===----------------------------------------------------------------------===//
 //  Pseudo
@@ -290,9 +290,9 @@ let isTerminator = 1, isCall = 1, isBranch = 1 in {
 // Load class is from Sparc Load F3_2, where we print "LD[I] $reg $addr"
 // class Load<bits<4>, RegisterClass RC, ValueType VT, string opstr> 
 class Load<bits<4> opcode, string opstr>
-    : LC3PC9 <opcode, (outs GPR:$reg), (ins MEM:$PCoffset9), 
+    : LC3PC9 <opcode, (outs GPR:$reg), (ins MemPcOp:$PCoffset9), 
             !strconcat(opstr, "\t$reg,\t$PCoffset9"), 
-            [(set i16:$reg, (load ADDRESS:$PCoffset9))]>;
+            [(set i16:$reg, (load addrPC:$PCoffset9))]>;
 
 let Defs = [SR] in {
     
@@ -317,9 +317,9 @@ let Defs = [SR] in {
 // Store class is from Sparc Store F3_2, where we print "ST[I] $reg $addr"
 // class Store<bits<4>, RegisterClass RC, ValueType VT, string opstr> 
 class Store<bits<4> opcode, string opstr>
-    : LC3PC9 <opcode, (outs), (ins GPR:$reg, MEM:$PCoffset9), 
+    : LC3PC9 <opcode, (outs), (ins GPR:$reg, MemPcOp:$PCoffset9), 
             !strconcat(opstr, "\t$reg,\t$PCoffset9"), 
-            [(store i16:$reg, ADDRESS:$PCoffset9)]>;
+            [(store i16:$reg, addrPC:$PCoffset9)]>;
 
 def ST  : Store<0b0011, "ST">;  // [PC + PCoffset9] <- reg
 def STI : Store<0b1011, "STI">; // [[PC + PCoffset9]] <- reg

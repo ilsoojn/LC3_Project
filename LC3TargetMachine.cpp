@@ -10,10 +10,12 @@
 //===----------------------------------------------------------------------===//
 
 #include "LC3TargetMachine.h"
+
 #include "LC3.h"
 #include "LC3MachineFunctionInfo.h"
 #include "LC3TargetObjectFile.h"
 #include "TargetInfo/LC3TargetInfo.h"
+
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
 #include "llvm/MC/TargetRegistry.h"
@@ -27,8 +29,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeLC3Target() {
   // Register the target.
   RegisterTargetMachine<LC3TargetMachine> X(getTheLC3Target());\
 
-//   PassRegistry &PR = *PassRegistry::getPassRegistry();
-//   initializeLC3DAGToDAGISelPass(PR);
+  PassRegistry &PR = *PassRegistry::getPassRegistry();
+  initializeLC3DAGToDAGISelPass(PR);
 }
 
 static StringRef computeDataLayout(const Triple &TT) {
@@ -129,10 +131,7 @@ public:
     LC3TargetMachine &getLC3TargetMachine() const {
         return getTM<LC3TargetMachine>();
     }
-    const LC3Subtarget &getLC3Subtarget() const {
-    return *getLC3TargetMachine().getSubtargetImpl();
-    }
-
+    
     void addIRPasses() override;
     bool addInstSelector() override;
     void addPreEmitPass() override;

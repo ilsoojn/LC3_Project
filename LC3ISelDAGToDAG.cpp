@@ -11,15 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "LC3ISelDAGToDAG.h"
-#include "LC3.h"
-#include "LC3MachineFunction.h"
-#include "LC3RegisterInfo.h"
-#include "llvm/CodeGen/MachineRegisterInfo.h"
-#include "llvm/CodeGen/SelectionDAG.h"
-#include "llvm/IR/Intrinsics.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/raw_ostream.h"
+
 using namespace llvm;
 
 #define DEBUG_TYPE "lc3-isel"
@@ -39,18 +31,80 @@ bool LC3DAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
   return SelectionDAGISel::runOnMachineFunction(MF);;
 }
 
-/// getGlobalBaseReg - Output the instructions required to put the
-/// GOT address into a register.
-SDNode *LC3DAGToDAGISel::getGlobalBaseReg() {
-  Register GlobalBaseReg = MF->getInfo<LC3FunctionInfo>()->getGlobalBaseReg(*MF);
-  return CurDAG->getRegister(GlobalBaseReg, 
-                              getTargetLowering()->getPointerTy(CurDAG->getDataLayout()))
-      .getNode();
+bool LC3DAGToDAGISel::SelectAddr(SDValue Addr, SDValue &Offset){
+
+  LLVM_DEBUG(dbgs() << "SelectAddr:\n\t");
+  Addr.dump();
+
+  // TODO: have its own RATHER than calling the SelectAddrRegImm
+  SDValue Base;
+  return SelectAddrRegImm(Addr, Base, Offset);
 }
 
-bool SelectAddrRegImm(SDValue Addr, SDValue &Base, SDValue &Offset){}
+bool LC3DAGToDAGISel::SelectAddrRegImm(SDValue Addr, SDValue &Base, SDValue &Offset){
 
-bool SelectAddrRegReg(SDValue Addr, SDValue &Reg1, SDValue &Reg2){}
+  LLVM_DEBUG(dbgs() << "SelectAddrRegImm:\n\t");
+  Addr.dump();
+
+  DataLayout DL = CurDAG->getDataLayout();
+  MVT PtrVT = TLI->getPointerTy(DL);
+  MVT ImmVT = Addr.getSimpleValueType();
+
+  // FrameIndex + Imm
+  if (FrameIndexSDNode *FrameIdxNode = dyn_cast<FrameIndexSDNode>(Addr)) {
+    Base = CurDAG->getTargetFrameIndex(FrameIdxNode->getIndex(), PtrVT);
+    Offset = CurDAG->getTargetConstant(0, SDLoc(Addr), ImmVT);
+    return true;
+  }
+
+  // Question: So many <TARGET>ISelDAGToDAG checks for FrameIdxSDNode, first as above
+  //           Then Doit as below again,.... Why is that?
+  if (!CurDAG->isBaseWithConstantOffset(Addr))
+    return false;
+
+  // <Reg + Imm> Pattern
+  if (ConstantSDNode *ConstNode = dyn_cast<ConstantSDNode>(Addr.getOperand(1))) {
+    if (!isInt<3>(ConstNode->getSExtValue())) {
+      Base = Addr.getOperand(0);
+      if (FrameIndexSDNode *FrameIdxNode = dyn_cast<FrameIndexSDNode>(Addr.getOperand(0)))
+        Base = CurDAG->getTargetFrameIndex(FrameIdxNode->getIndex(), PtrVT);
+      
+      Offset = CurDAG->getTargetConstant(ConstNode->getZExtValue(), SDLoc(Addr), ImmVT);
+      return true;
+    }
+  }
+  Base = Addr;
+  Offset = CurDAG->getTargetConstant(0, SDLoc(Addr), ImmVT);
+  return true;
+}
+
+bool LC3DAGToDAGISel::SelectAddrRegReg(SDValue Addr, SDValue &Reg1, SDValue &Reg2){
+  
+  LLVM_DEBUG(dbgs() << "SelectAddrRegReg:\n\t");
+  Addr.dump();
+
+  DataLayout DL = CurDAG->getDataLayout();
+  MVT PtrVT = TLI->getPointerTy(DL);
+
+  // FrameIndex + Register ???
+  if (Addr.getOpcode() == ISD::FrameIndex) return false;
+
+  if (Addr.getOpcode() == ISD::ADD) {
+    if (ConstantSDNode *ConstNode = dyn_cast<ConstantSDNode>(Addr.getOperand(1)))
+      // <Reg + Reg> Pattern
+      if (isInt<3>(ConstNode->getSExtValue())){
+        Reg1 = Addr.getOperand(0);
+        Reg2 = Addr.getOperand(1);
+        return true;
+      }
+      return false; // Possibly <Reg + Imm> Pattern
+  }
+
+  Reg1 = Addr;
+  Reg2 = CurDAG->getRegister(LC3::R0, PtrVT);
+  return true;
+
+}
 
 /// Select instructions not customized! Used for
 /// expanded, promoted and normal instructions
@@ -64,54 +118,18 @@ void LC3DAGToDAGISel::Select(SDNode *Node) {
     return;
   }
 
-  // See if subclasses can handle this node.
-  if (trySelect(Node))
-    return;
-
-  switch(Opcode) {
+  // TODO: do I want to have 'select<ISD::ISDOP>' for special OP first (eg LD/ST/FrameIndex...)
+  /*
+  switch (N->getOpcode()) {
   default: break;
-
-  case ISD::ADD:
-    if (Node->getSimpleValueType(0).isVector() &&
-        selectVecAddAsVecSubIfProfitable(Node))
-      return;
-    break;
-
-  // Get target GOT address.
-  case ISD::GLOBAL_OFFSET_TABLE:
-    ReplaceNode(Node, getGlobalBaseReg());
-    return;
-
-#ifndef NDEBUG
-  case ISD::LOAD:
-  case ISD::STORE:
-    assert((Subtarget->systemSupportsUnalignedAccess() ||
-            cast<MemSDNode>(Node)->getAlign() >=
-                cast<MemSDNode>(Node)->getMemoryVT().getStoreSize()) &&
-           "Unexpected unaligned loads/stores.");
-    break;
-#endif
+  case ISDE::LOAD: return select<ISD::LOAD>(Node);
+  ...
   }
-
+  */
+  
   // Select the default instruction
   SelectCode(Node);
 }
-
-// bool LC3DAGToDAGISel::SelectInlineAsmMemoryOperand(
-//     const SDValue &Op, InlineAsm::ConstraintCode ConstraintID,
-//     std::vector<SDValue> &OutOps) {
-//   // All memory constraints can at least accept raw pointers.
-//   switch(ConstraintID) {
-//   default:
-//     llvm_unreachable("Unexpected asm memory constraint");
-//   case InlineAsm::ConstraintCode::m:
-//   case InlineAsm::ConstraintCode::R:
-//   case InlineAsm::ConstraintCode::ZC:
-//     OutOps.push_back(Op);
-//     return false;
-//   }
-//   return true;
-// }
 
 char LC3DAGToDAGISel::ID = 0;
 

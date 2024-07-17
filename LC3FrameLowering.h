@@ -14,15 +14,17 @@
 #define LLVM_LIB_TARGET_LC3_LC3FRAMELOWERING_H
 
 #include "LC3.h"
+#include "LC3InstrInfo.h"
 #include "llvm/CodeGen/TargetFrameLowering.h"
 #include "llvm/Support/TypeSize.h"
 
 namespace llvm {
 
 class LC3Subtarget;
+class LC3InstrInfo;
+
 class LC3FrameLowering : public TargetFrameLowering {
-protected:
-  const LC3Subtarget &STI;
+  
 public:
   explicit LC3FrameLowering(const LC3Subtarget &STI);
 
@@ -30,6 +32,16 @@ public:
   /// the function.
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
+
+  // bool hasReservedCallFrame(const MachineFunction &MF) const override;
+  // void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+  //                           RegScavenger *RS = nullptr) const override;
+  // bool restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
+  //                             MachineBasicBlock::iterator MI,
+  //                             MutableArrayRef<CalleeSavedInfo> CSI,
+
+  void BuildCFI(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                const DebugLoc &DL, const LC3InstrInfo &TII, const MCCFIInstruction &CFIInst) const;
 
   /// hasFP - Return true if the specified function should have a dedicated
   /// frame pointer register. For most targets this is true only if the function
@@ -44,7 +56,7 @@ public:
   void adjustStackPtr(MachineFunction &MF,
                         MachineBasicBlock &MBB,
                         MachineBasicBlock::iterator MBBI,
-                        int16_t Amount) const;
+                        uint16_t Amount) const;
 };
 
 } // End llvm namespace

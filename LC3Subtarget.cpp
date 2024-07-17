@@ -46,8 +46,8 @@ LC3Subtarget &LC3Subtarget::initializeSubtargetDependencies(StringRef CPU, Strin
   return *this;
 }
 
+// LC3GenSubtargetInfo will display features by llc -march=LC3 -mcpu=help
 LC3Subtarget::LC3Subtarget(const StringRef &CPU, const StringRef &FS, const TargetMachine &TM)
-  // LC3GenSubtargetInfo will display features by llc -march=LC3 -mcpu=help
     :   LC3GenSubtargetInfo(TM.getTargetTriple(), CPU, /*TuneCPU*/ CPU, FS),
         TargetTriple(TM.getTargetTriple()),
         // TSInfo(),           // Target SelectionDAG

@@ -59,7 +59,8 @@ LC3TargetLowering::LC3TargetLowering(const TargetMachine &TM,
 
   // Register
   computeRegisterProperties(STI.getRegisterInfo());
-  addRegisterClass({MVT::i8, MVT::i16}, &LC3::GPRRegClassID);
+  addRegisterClass(MVT::i8, &LC3::GPRRegClass);
+  addRegisterClass(MVT::i16, &LC3::GPRRegClass);
   setStackPointerRegisterToSaveRestore(LC3::SP);
 
   // General Operations

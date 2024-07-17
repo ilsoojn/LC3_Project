@@ -13,7 +13,6 @@
 #ifndef LLVM_LIB_TARGET_LC3_LC3TARGETMACHINE_H
 #define LLVM_LIB_TARGET_LC3_LC3TARGETMACHINE_H
 
-#include "LC3.h"
 #include "LC3Subtarget.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/Target/TargetMachine.h"
@@ -26,6 +25,7 @@ class LC3TargetMachine : public LLVMTargetMachine {
 
   virtual void anchor();
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  mutable StringMap<std::unique_ptr<LC3Subtarget>> SubtargetMap;
 
 public:
   /* 

@@ -1,4 +1,4 @@
-//=- LC3MachineFunctionInfo.h - RISC-V machine function info ----*- C++ -*-=//
+//=- LC3MachineFunctionInfo.h - LC3 machine function info ----*- C++ -*-=//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -23,22 +23,23 @@ namespace llvm {
   private:
     Register GlobalBaseReg;
 
+    /* 
+      Below is from X86
+        "many x86 calling conventions pass arguments on the stack. 
+          The return value (or a pointer to it) is returned in a register." - Wikipedia Calling_convention
+    */
+    /// CalleeSavedFrameSize - Size of the callee-saved register portion of the
+    /// stack frame in bytes.
+    unsigned CalleeSavedFrameSize = 0;
+
     /// VarArgsFrameOffset - Frame offset to start of varargs area.
     int VarArgsFrameOffset;
 
-    /// SRetReturnReg - Holds the virtual register into which the sret
-    /// argument is passed.
-    Register SRetReturnReg;
-
-    /// IsLeafProc - True if the function is a leaf procedure.
-    bool IsLeafProc;
   public:
     LC3MachineFunctionInfo()
-      : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-        IsLeafProc(false) {}
+      : GlobalBaseReg(0), CalleeSavedFrameSize(0), VarArgsFrameOffset(0) {}
     LC3MachineFunctionInfo(const Function &F, const TargetSubtargetInfo *STI)
-        : GlobalBaseReg(0), VarArgsFrameOffset(0), SRetReturnReg(0),
-          IsLeafProc(false) {}
+        : GlobalBaseReg(0), CalleeSavedFrameSize(0), VarArgsFrameOffset(0) {}
 
     MachineFunctionInfo *
     clone(BumpPtrAllocator &Allocator, MachineFunction &DestMF,
@@ -51,11 +52,9 @@ namespace llvm {
     int getVarArgsFrameOffset() const { return VarArgsFrameOffset; }
     void setVarArgsFrameOffset(int Offset) { VarArgsFrameOffset = Offset; }
 
-    Register getSRetReturnReg() const { return SRetReturnReg; }
-    void setSRetReturnReg(Register Reg) { SRetReturnReg = Reg; }
+    unsigned getCalleeSavedFrameSize() const { return CalleeSavedFrameSize; }
+    void setCalleeSavedFrameSize(unsigned bytes) { CalleeSavedFrameSize = bytes; }
 
-    void setLeafProc(bool rhs) { IsLeafProc = rhs; }
-    bool isLeafProc() const { return IsLeafProc; }
   };
   
 }
